@@ -1,0 +1,16 @@
+---
+- name: "Xác minh đường dẫn mã nguồn vps-microservices"
+  ansible.builtin.stat:
+    path: "{{ workspace_dir }}/infra/vps-microservices/docker-compose.yml"
+  register: ms_compose_stat
+
+- name: "Kích hoạt Master Auto-Deploy Pipeline cho cụm Microservices"
+  ansible.builtin.command:
+    cmd: bash config/scripts/auto-deploy.sh --skip-pull
+    chdir: "{{ workspace_dir }}/infra/vps-microservices"
+  register: ms_deploy_out
+  changed_when: true
+
+- name: "Hiển thị kết quả khởi chạy vps-microservices"
+  ansible.builtin.debug:
+    msg: "✓ Toàn bộ cụm Microservices, Cơ sở dữ liệu và Ingress Nginx đã được kích hoạt thành công trên Node {{ inventory_hostname }}!"

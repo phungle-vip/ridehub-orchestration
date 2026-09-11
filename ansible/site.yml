@@ -1,0 +1,69 @@
+---
+# ==============================================================================
+# RideHub Master Multi-VPS Orchestration Playbook
+# ==============================================================================
+
+- name: "[GIAI ĐOẠN 0] Điều phối Cloudflare Tunnels & Bảo mật Zero Trust qua Terraform"
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tags:
+    - terraform
+    - cloudflare
+  tasks:
+    - name: "Kiểm tra thư mục Terraform"
+      ansible.builtin.stat:
+        path: "{{ workspace_dir }}/infra/orchestration/terraform"
+      register: tf_stat
+
+    - name: "Áp dụng cấu hình Terraform cho Cloudflare (Bảo vệ Kafdrop, SSH Zero Trust & IdP)"
+      ansible.builtin.command:
+        cmd: terraform apply -auto-approve
+        chdir: "{{ workspace_dir }}/infra/orchestration/terraform"
+      when: tf_stat.stat.exists
+      register: tf_out
+      changed_when: "'Resources: 0 added, 0 changed, 0 destroyed' not in tf_out.stdout"
+
+    - name: "Xác nhận Cloudflare Zero Trust đã cập nhật"
+      ansible.builtin.debug:
+        msg: "✓ Cloudflare Zero Trust đã được đồng bộ tự động qua Terraform!"
+
+- name: "[GIAI ĐOẠN 1] Kiểm tra & Chuẩn hóa hệ thống trên toàn bộ các Nodes"
+  hosts: all_vps
+  gather_facts: true
+  roles:
+    - common
+
+- name: "[GIAI ĐOẠN 2] Xác minh liên kết mạng nội bộ giữa các VPS (Mesh Network)"
+  hosts: all_vps
+  gather_facts: false
+  roles:
+    - mesh_network
+
+- name: "[GIAI ĐOẠN 3] Điều phối cấu hình Cụm Hạ Tầng Trung Tâm (VPS Infra)"
+  hosts: vps_infra
+  gather_facts: false
+  roles:
+    - deploy_infra
+
+- name: "[GIAI ĐOẠN 4] Điều phối cấu hình Cụm Nghiệp Vụ (VPS Microservices)"
+  hosts: vps_microservices
+  gather_facts: false
+  roles:
+    - deploy_microservices
+
+- name: "[TỔNG KẾT] Báo cáo trạng thái toàn bộ hạ tầng Multi-VPS"
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: "Thông báo hoàn tất điều phối"
+      ansible.builtin.debug:
+        msg:
+          - "======================================================================"
+          - "🎉 ĐIỀU PHỐI MULTI-VPS THÀNH CÔNG!"
+          - "Node 1 (vps1-infra): {{ hostvars['vps1']['internal_ip'] }} -> Đã sẵn sàng."
+          - "Node 2 (vps2-microservices): {{ hostvars['vps2']['internal_ip'] }} -> Đã sẵn sàng."
+          - "Bảo mật: Chỉ Kafka UI (Kafdrop) nằm sau Cloudflare Zero Trust Access."
+          - "Các UI khác (Keycloak, Grafana, Consul, Vault, RedisInsight) truy cập trực tiếp."
+          - "======================================================================"

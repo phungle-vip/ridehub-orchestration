@@ -1,0 +1,20 @@
+---
+- name: "Xác minh đường dẫn mã nguồn vps-infra"
+  ansible.builtin.stat:
+    path: "{{ workspace_dir }}/infra/vps-infra/docker-compose.yml"
+  register: compose_stat
+
+- name: "Kiểm tra cú pháp cấu hình docker-compose của vps-infra"
+  ansible.builtin.command:
+    cmd: docker compose -f {{ workspace_dir }}/infra/vps-infra/docker-compose.yml config --quiet
+  changed_when: false
+
+- name: "Khởi chạy Cụm Hạ Tầng Trung Tâm (vps-infra) qua Docker Compose"
+  ansible.builtin.command:
+    cmd: docker compose -f {{ workspace_dir }}/infra/vps-infra/docker-compose.yml up -d
+  register: infra_up
+  changed_when: true
+
+- name: "Hiển thị kết quả khởi chạy vps-infra"
+  ansible.builtin.debug:
+    msg: "✓ Cụm Hạ Tầng Trung Tâm (vps-infra) đã được kích hoạt thành công trên Node {{ inventory_hostname }}!"

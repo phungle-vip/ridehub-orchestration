@@ -1,0 +1,6 @@
+---
+domain: "phungvip.io.vn"
+timezone: "Asia/Ho_Chi_Minh"
+infra_internal_ip: "172.28.0.10"
+ms_internal_ip: "172.28.0.20"
+workspace_dir: "/home/phungvip/ridehub"

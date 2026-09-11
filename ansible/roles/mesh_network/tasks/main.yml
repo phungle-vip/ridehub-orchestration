@@ -1,0 +1,16 @@
+---
+- name: "Xác minh IP nội bộ của Node"
+  ansible.builtin.debug:
+    msg: "Node {{ inventory_hostname }} sở hữu IP nội bộ: {{ internal_ip }}"
+
+- name: "Kiểm tra kết nối TCP sang Node đối tác"
+  ansible.builtin.wait_for:
+    host: "{{ (inventory_hostname == 'vps1') | ternary(ms_internal_ip, infra_internal_ip) }}"
+    port: 22
+    timeout: 5
+    state: started
+  register: conn_test
+
+- name: "Xác nhận liên kết mạng nội bộ thông suốt"
+  ansible.builtin.debug:
+    msg: "✓ Kết nối mạng nội bộ giữa VPS 1 ({{ infra_internal_ip }}) và VPS 2 ({{ ms_internal_ip }}) hoàn toàn thông suốt!"

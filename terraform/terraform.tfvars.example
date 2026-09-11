@@ -1,0 +1,10 @@
+# ==============================================================================
+# Cloudflare Credentials & Domain Config for Terraform
+# Copy this file to terraform.tfvars: cp terraform.tfvars.example terraform.tfvars
+# ==============================================================================
+
+cloudflare_api_token  = "your_cloudflare_api_token_here"
+cloudflare_account_id = "8a635c5212cf070382f3924f4825ad46"
+cloudflare_zone_id    = "8ff44ec06feb94dd799b8aa45d5ae5fc"
+domain                = "phungvip.io.vn"
+admin_email           = "admin@phungvip.io.vn"

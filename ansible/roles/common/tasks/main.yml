@@ -1,0 +1,22 @@
+---
+- name: "Kiểm tra kết nối và thông tin hệ điều hành"
+  ansible.builtin.debug:
+    msg: "Node {{ inventory_hostname }} đã sẵn sàng! OS: {{ ansible_distribution }} {{ ansible_distribution_version }} (Kernel: {{ ansible_kernel }})"
+
+- name: "Kiểm tra Docker Engine trên Node"
+  ansible.builtin.command: docker --version
+  register: docker_check
+  changed_when: false
+
+- name: "Hiển thị phiên bản Docker"
+  ansible.builtin.debug:
+    msg: "Docker Engine: {{ docker_check.stdout }}"
+
+- name: "Kiểm tra Docker Compose plugin"
+  ansible.builtin.command: docker compose version
+  register: compose_check
+  changed_when: false
+
+- name: "Hiển thị phiên bản Docker Compose"
+  ansible.builtin.debug:
+    msg: "Docker Compose: {{ compose_check.stdout }}"
