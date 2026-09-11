@@ -44,6 +44,12 @@ variable "infra_tunnel_id" {
   default     = "6c1ea060-1d61-4254-94ee-f79d85b1ba8e"
 }
 
+variable "ms_tunnel_id" {
+  description = "Cloudflare Tunnel ID for the VPS Microservices cluster"
+  type        = string
+  default     = "316a7362-ad15-4054-9942-b18b7b99fada"
+}
+
 # ------------------------------------------------------------------------------
 # Vault & Consul Centralized Secrets Management
 # ------------------------------------------------------------------------------
