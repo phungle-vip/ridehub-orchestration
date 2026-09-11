@@ -49,15 +49,40 @@
 *(Lưu ý: VPS 2 chạy 5 ứng dụng Java Spring Boot + 4 instances MySQL nên khuyến nghị tối thiểu 8GB RAM để vận hành mượt mà).*
 
 ### B. Mạng Nội Bộ (Private Network / Layer 4 Mesh)
-Để Microservices trên VPS 2 kết nối với Kafka (port 9093) và Redis (port 6379) trên VPS 1:
-1. **Trường hợp 2 VPS cùng 1 nhà cung cấp (Cùng VPC)**:
-   - Bật tính năng **Private Networking (VPC)** trên Dashboard của Cloud Provider.
-   - Ghi lại Private IP của 2 VPS (ví dụ: VPS 1 là `10.0.0.10`, VPS 2 là `10.0.0.20`).
-2. **Trường hợp 2 VPS khác nhà cung cấp hoặc khác Datacenter**:
-   - Sử dụng **Tailscale Mesh VPN** hoặc **WireGuard**:
-     - Cài Tailscale trên cả 2 máy: `curl -fsSL https://tailscale.com/install.sh | sh`
-     - Chạy `tailscale up` trên cả 2 node.
-     - Lấy Tailscale IP (dạng `100.x.y.z`) làm IP mạng nội bộ an toàn được mã hóa.
+Để Microservices trên VPS 2 kết nối với Kafka (port 9093) và Redis (port 6379) trên VPS 1, có thể sử dụng một trong 3 phương án sau:
+
+1. **Phương án 1 (Khuyến Nghị Cao Nhất: Cloudflare-First với Zero Trust Private Network)**:
+   - **Ưu điểm vượt trội**: Hoàn toàn **miễn phí**, không cần mở bất kỳ cổng Inbound firewall nào trên VPS 1 & VPS 2, tận dụng hạ tầng Cloudflare sẵn có của RideHub.
+   - **Nguyên lý**:
+     - **Trên VPS 1 (Infra Hub)**: Cloudflare Tunnel đăng ký Private Network Route cho subnet Docker `172.18.0.0/16` (đã được cấu hình tự động trong Terraform [`infra/orchestration/terraform/main.tf`](file:///home/phungvip/ridehub/infra/orchestration/terraform/main.tf)).
+     - **Trên VPS 2 (Microservices)**: Cài đặt client `cloudflare-warp` ở chế độ headless (chạy ngầm không giao diện):
+       ```bash
+       # Cài đặt cloudflare-warp trên VPS 2 (Ubuntu/Debian)
+       curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg | gpg --yes --dearmor --output /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
+       echo "deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/cloudflare-warp.list
+       apt update && apt install cloudflare-warp -y
+
+       # Đăng ký và kết nối WARP vào mạng Zero Trust của tổ chức
+       warp-cli registration new
+       warp-cli mode warp
+       warp-cli connect
+       ```
+     - Sau khi kết nối, VPS 2 có thể ping và gọi trực tiếp tới các dịch vụ trên VPS 1 qua IP Docker nội bộ:
+       - Kafka SSL: `172.18.0.x:9093`
+       - Redis: `172.18.0.x:6379`
+       - MySQL: `172.18.0.x:3306`
+
+2. **Phương án 2: Mạng Riêng Của Nhà Cung Cấp (Cùng Cloud Provider / Cùng VPC)**:
+   - Nếu cả 2 VPS thuê cùng một nhà cung cấp (Hetzner, DigitalOcean, Vultr, AWS, OVH):
+     - Bật tính năng **Private Networking (VPC)** trên Dashboard của Cloud Provider.
+     - Sử dụng Private IP nội bộ do nhà cung cấp cấp phát (ví dụ: VPS 1 là `10.0.0.10`, VPS 2 là `10.0.0.20`).
+     - Tốc độ đạt tối đa theo băng thông mạng LAN vật lý của Datacenter.
+
+3. **Phương án 3: Tailscale Mesh VPN hoặc WireGuard (Dự phòng độc lập)**:
+   - Dành cho trường hợp 2 VPS đặt ở 2 nhà cung cấp khác nhau mà không muốn dùng WARP:
+     - Cài Tailscale trên cả 2 node: `curl -fsSL https://tailscale.com/install.sh | sh`
+     - Chạy `tailscale up` trên cả 2 máy và đăng nhập tài khoản.
+     - Lấy địa chỉ IP Tailscale (dải `100.x.y.z`) làm IP mạng nội bộ mã hóa an toàn giữa 2 node.
 
 ---
 
