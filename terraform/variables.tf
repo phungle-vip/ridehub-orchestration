@@ -43,3 +43,33 @@ variable "infra_tunnel_id" {
   type        = string
   default     = "6c1ea060-1d61-4254-94ee-f79d85b1ba8e"
 }
+
+# ------------------------------------------------------------------------------
+# Vault & Consul Centralized Secrets Management
+# ------------------------------------------------------------------------------
+variable "vault_address" {
+  description = "HashiCorp Vault URL"
+  type        = string
+  default     = "https://vault.phungvip.io.vn"
+}
+
+variable "vault_token" {
+  description = "HashiCorp Vault management root token (can also be read from VAULT_TOKEN env var)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "consul_address" {
+  description = "Consul cluster address"
+  type        = string
+  default     = "consul.phungvip.io.vn:443"
+}
+
+variable "consul_token" {
+  description = "Consul management token (can also be read from CONSUL_HTTP_TOKEN env var)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+

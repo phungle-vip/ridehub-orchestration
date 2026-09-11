@@ -5,5 +5,13 @@ terraform {
       source  = "cloudflare/cloudflare"
       version = "~> 4.40"
     }
+    vault = {
+      source  = "hashicorp/vault"
+      version = "~> 4.4"
+    }
+    consul = {
+      source  = "hashicorp/consul"
+      version = "~> 2.21"
+    }
   }
 }
