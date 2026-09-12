@@ -20,12 +20,12 @@ provider "consul" {
 # 1. Vault Policies & Secret Management
 # ------------------------------------------------------------------------------
 
-# Policy cấp quyền Read-Only cho Microservices và Developers kết nối Vault
+# Policy cấp quyền Read-Only cho Microservices kết nối Vault
 resource "vault_policy" "microservices_readonly" {
   name = "microservices-readonly"
 
   policy = <<-EOT
-    # Microservices & Devs read shared infrastructure secrets
+    # Microservices read shared infrastructure secrets
     path "secret/data/infrastructure" {
       capabilities = ["read", "list"]
     }
@@ -44,6 +44,58 @@ resource "vault_policy" "microservices_readonly" {
       capabilities = ["read", "list"]
     }
     path "secret/metadata/*" {
+      capabilities = ["read", "list"]
+    }
+  EOT
+}
+
+# Policy cấp toàn quyền quản trị cho Admin và DevOps
+resource "vault_policy" "admin_policy" {
+  name = "admin-policy"
+
+  policy = <<-EOT
+    path "secret/*" {
+      capabilities = ["create", "read", "update", "delete", "list"]
+    }
+    path "sys/*" {
+      capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+    }
+    path "auth/*" {
+      capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+    }
+    path "identity/*" {
+      capabilities = ["create", "read", "update", "delete", "list"]
+    }
+  EOT
+}
+
+# Policy phân quyền động cho từng Developer (chỉ đọc/ghi đúng thư mục của mình)
+resource "vault_policy" "dev_personal_policy" {
+  name = "dev-personal-policy"
+
+  policy = <<-EOT
+    path "secret/metadata" {
+      capabilities = ["list"]
+    }
+    path "secret/metadata/users" {
+      capabilities = ["list"]
+    }
+    path "secret/data/users/{{identity.entity.metadata.username}}/*" {
+      capabilities = ["create", "read", "update", "delete", "list"]
+    }
+    path "secret/metadata/users/{{identity.entity.metadata.username}}/*" {
+      capabilities = ["create", "read", "update", "delete", "list"]
+    }
+    path "secret/data/application" {
+      capabilities = ["read"]
+    }
+    path "secret/metadata/application" {
+      capabilities = ["read", "list"]
+    }
+    path "secret/data/infrastructure" {
+      capabilities = ["read"]
+    }
+    path "secret/metadata/infrastructure" {
       capabilities = ["read", "list"]
     }
   EOT

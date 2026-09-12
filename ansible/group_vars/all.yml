@@ -3,4 +3,9 @@ domain: "phungvip.io.vn"
 timezone: "Asia/Ho_Chi_Minh"
 infra_internal_ip: "172.28.0.10"
 ms_internal_ip: "172.28.0.20"
+wireguard_subnet: "10.10.0.0/24"
+wireguard_infra_ip: "10.10.0.1"
+wireguard_ms_ip: "10.10.0.2"
+wireguard_port: 51820
 workspace_dir: "/home/phungvip/ridehub"
+

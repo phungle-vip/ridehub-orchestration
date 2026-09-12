@@ -34,11 +34,12 @@
   roles:
     - common
 
-- name: "[GIAI ĐOẠN 2] Xác minh liên kết mạng nội bộ giữa các VPS (Mesh Network)"
+- name: "[GIAI ĐOẠN 2] Thiết lập Mạng Nội Bộ & Tường Lửa UFW (Mesh Network & Firewall)"
   hosts: all_vps
   gather_facts: false
   roles:
     - mesh_network
+    - firewall
 
 - name: "[GIAI ĐOẠN 3] Điều phối cấu hình Cụm Hạ Tầng Trung Tâm (VPS Infra)"
   hosts: vps_infra

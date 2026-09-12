@@ -1,0 +1,60 @@
+---
+# ==============================================================================
+# Firewall Rules cho VPS 2 (Microservices)
+# ==============================================================================
+
+- name: "[VPS 2] Đặt chính sách UFW mặc định: Deny Incoming"
+  community.general.ufw:
+    default: deny
+    direction: incoming
+
+- name: "[VPS 2] Đặt chính sách UFW mặc định: Allow Outgoing"
+  community.general.ufw:
+    default: allow
+    direction: outgoing
+
+- name: "[VPS 2] Mở cổng HTTP 80 & HTTPS 443 cho Cloudflare Ingress"
+  community.general.ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+    comment: "Cloudflare Ingress Port {{ item }}"
+  loop:
+    - 80
+    - 443
+
+- name: "[VPS 2] Mở lưu lượng trên card mạng ảo wg0"
+  community.general.ufw:
+    rule: allow
+    interface: wg0
+    direction: in
+    comment: "Allow WireGuard Subnet"
+
+- name: "[VPS 2] Cho phép Admin (10.10.0.3) Stealth SSH qua WireGuard"
+  community.general.ufw:
+    rule: allow
+    src: "10.10.0.3"
+    port: 22
+    proto: tcp
+    comment: "Admin Stealth SSH"
+
+- name: "[VPS 2] Chặn toàn bộ IP khác trong dải WireGuard SSH vào port 22"
+  community.general.ufw:
+    rule: deny
+    src: "{{ wireguard_subnet | default('10.10.0.0/24') }}"
+    port: 22
+    proto: tcp
+    comment: "Block Non-Admin SSH"
+
+- name: "[VPS 2] Mở các port MySQLs (3306 - 3310) cho Admin"
+  community.general.ufw:
+    rule: allow
+    src: "10.10.0.3"
+    port: "3306:3310"
+    proto: tcp
+    comment: "Admin All MySQL DBs"
+
+- name: "[VPS 2] Kích hoạt và bật logging cho UFW"
+  community.general.ufw:
+    state: enabled
+

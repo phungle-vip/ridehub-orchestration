@@ -1,0 +1,29 @@
+---
+# ==============================================================================
+# Ansible Role: Firewall (UFW Layer 4 Zero-Trust Rules)
+# Tham chiếu: docs/guides/WIREGUARD_UFW_GUIDE.md (Chương 5)
+# ==============================================================================
+
+- name: "Kiểm tra sự tồn tại của tiện ích ufw trên Node"
+  ansible.builtin.command: which ufw
+  register: ufw_installed
+  failed_when: false
+  changed_when: false
+
+- name: "Áp dụng chính sách tường lửa cho VPS 1 (Infra Hub)"
+  ansible.builtin.include_tasks: vps_infra.yml
+  when:
+    - ufw_installed.rc == 0
+    - inventory_hostname in groups['vps_infra']
+
+- name: "Áp dụng chính sách tường lửa cho VPS 2 (Microservices)"
+  ansible.builtin.include_tasks: vps_microservices.yml
+  when:
+    - ufw_installed.rc == 0
+    - inventory_hostname in groups['vps_microservices']
+
+- name: "Bỏ qua UFW nếu chạy trên môi trường Mock không có ufw"
+  ansible.builtin.debug:
+    msg: "⚠️ Bỏ qua thiết lập UFW vì không tìm thấy lệnh ufw trên container {{ inventory_hostname }} (Mock Environment)."
+  when: ufw_installed.rc != 0
+

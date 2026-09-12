@@ -1,0 +1,72 @@
+---
+# ==============================================================================
+# Firewall Rules cho VPS 1 (Infra Hub)
+# ==============================================================================
+
+- name: "[VPS 1] Đặt chính sách UFW mặc định: Deny Incoming"
+  community.general.ufw:
+    default: deny
+    direction: incoming
+
+- name: "[VPS 1] Đặt chính sách UFW mặc định: Allow Outgoing"
+  community.general.ufw:
+    default: allow
+    direction: outgoing
+
+- name: "[VPS 1] Mở cổng WireGuard UDP 51820"
+  community.general.ufw:
+    rule: allow
+    port: "{{ wireguard_port | default(51820) }}"
+    proto: udp
+    comment: "WireGuard VPN Endpoint"
+
+- name: "[VPS 1] Mở cổng HTTP 80 & HTTPS 443 cho Cloudflare Ingress"
+  community.general.ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+    comment: "Cloudflare Ingress Port {{ item }}"
+  loop:
+    - 80
+    - 443
+
+- name: "[VPS 1] Mở lưu lượng trên card mạng ảo wg0"
+  community.general.ufw:
+    rule: allow
+    interface: wg0
+    direction: in
+    comment: "Allow WireGuard Subnet"
+
+- name: "[VPS 1] Cho phép Admin (10.10.0.3) Stealth SSH qua WireGuard"
+  community.general.ufw:
+    rule: allow
+    src: "10.10.0.3"
+    port: 22
+    proto: tcp
+    comment: "Admin Stealth SSH"
+
+- name: "[VPS 1] Chặn toàn bộ IP khác trong dải WireGuard SSH vào port 22"
+  community.general.ufw:
+    rule: deny
+    src: "{{ wireguard_subnet | default('10.10.0.0/24') }}"
+    port: 22
+    proto: tcp
+    comment: "Block Non-Admin SSH"
+
+- name: "[VPS 1] Mở các dịch vụ nội bộ cho VPS 2 (Kafka, Redis, Consul, Vault)"
+  community.general.ufw:
+    rule: allow
+    src: "{{ wireguard_ms_ip | default('10.10.0.2') }}"
+    port: "{{ item.port }}"
+    proto: tcp
+    comment: "{{ item.name }}"
+  loop:
+    - { port: 9093, name: "VPS2 Kafka SASL_SSL" }
+    - { port: 6379, name: "VPS2 Redis Cache" }
+    - { port: 8500, name: "VPS2 Consul API" }
+    - { port: 8200, name: "VPS2 Vault API" }
+
+- name: "[VPS 1] Kích hoạt và bật logging cho UFW"
+  community.general.ufw:
+    state: enabled
+

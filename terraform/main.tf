@@ -84,11 +84,47 @@ resource "cloudflare_zero_trust_access_policy" "ssh_policy" {
 }
 
 # ------------------------------------------------------------------------------
-# 4. DNS CNAME Record for SSH (Managed by Terraform)
+# 4. VPN Management Portal Zero Trust Access (wg-easy)
+# Protected by Keycloak OIDC Claim: ONLY ROLE_ADMIN & ROLE_DEVOPS allowed
+# ------------------------------------------------------------------------------
+resource "cloudflare_zero_trust_access_application" "vpn_portal" {
+  zone_id                   = var.cloudflare_zone_id
+  name                      = "RideHub VPN Management Portal"
+  domain                    = "vpn.${var.domain}"
+  type                      = "self_hosted"
+  session_duration          = "8h"
+  auto_redirect_to_identity = true
+  allowed_idps              = [cloudflare_zero_trust_access_identity_provider.keycloak.id]
+}
+
+resource "cloudflare_zero_trust_access_policy" "vpn_admin_only" {
+  application_id = cloudflare_zero_trust_access_application.vpn_portal.id
+  zone_id        = var.cloudflare_zone_id
+  name           = "Allow Keycloak Authenticated Users"
+  decision       = "allow"
+  precedence     = 1
+
+  include {
+    login_method = [cloudflare_zero_trust_access_identity_provider.keycloak.id]
+    email        = [var.admin_email, "admin@localhost", "phungvip@ridehub.vn", "devops@ridehub.vn"]
+  }
+}
+
+# ------------------------------------------------------------------------------
+# 5. DNS CNAME Records (Managed by Terraform)
 # ------------------------------------------------------------------------------
 resource "cloudflare_record" "ssh" {
   zone_id = var.cloudflare_zone_id
   name    = "ssh"
+  type    = "CNAME"
+  content = "${var.infra_tunnel_id}.cfargotunnel.com"
+  proxied = true
+  ttl     = 1
+}
+
+resource "cloudflare_record" "vpn" {
+  zone_id = var.cloudflare_zone_id
+  name    = "vpn"
   type    = "CNAME"
   content = "${var.infra_tunnel_id}.cfargotunnel.com"
   proxied = true
