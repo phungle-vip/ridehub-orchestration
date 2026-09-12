@@ -69,13 +69,78 @@ resource "vault_policy" "admin_policy" {
   EOT
 }
 
-# Policy phân quyền động cho từng Developer (chỉ đọc/ghi đúng thư mục của mình)
-resource "vault_policy" "dev_personal_policy" {
-  name = "dev-personal-policy"
+# Policy phân quyền động cho từng Developer (chỉ đọc/ghi thư mục của mình và roles/developer)
+resource "vault_policy" "dev_policy" {
+  name = "dev-policy"
 
   policy = <<-EOT
     path "secret/metadata" {
       capabilities = ["list"]
+    }
+    path "secret/metadata/roles" {
+      capabilities = ["list"]
+    }
+    path "secret/metadata/roles/developer/*" {
+      capabilities = ["read", "list"]
+    }
+    path "secret/data/roles/developer/*" {
+      capabilities = ["read"]
+    }
+    path "secret/data/roles/admin/*" {
+      capabilities = ["deny"]
+    }
+    path "secret/data/roles/qa/*" {
+      capabilities = ["deny"]
+    }
+    path "secret/metadata/users" {
+      capabilities = ["list"]
+    }
+    path "secret/data/users/{{identity.entity.metadata.username}}/*" {
+      capabilities = ["create", "read", "update", "delete", "list"]
+    }
+    path "secret/metadata/users/{{identity.entity.metadata.username}}/*" {
+      capabilities = ["create", "read", "update", "delete", "list"]
+    }
+    path "secret/data/application" {
+      capabilities = ["read"]
+    }
+    path "secret/metadata/application" {
+      capabilities = ["read", "list"]
+    }
+    path "secret/data/infrastructure" {
+      capabilities = ["read"]
+    }
+    path "secret/metadata/infrastructure" {
+      capabilities = ["read", "list"]
+    }
+    path "secret/data/common-kafka" {
+      capabilities = ["read"]
+    }
+  EOT
+}
+
+# Policy phân quyền động cho QA (chỉ đọc roles/qa và thư mục cá nhân)
+resource "vault_policy" "qa_policy" {
+  name = "qa-policy"
+
+  policy = <<-EOT
+    path "secret/metadata" {
+      capabilities = ["list"]
+    }
+    path "secret/metadata/roles" {
+      capabilities = ["list"]
+    }
+    path "secret/metadata/roles/qa/*" {
+      capabilities = ["read", "list"]
+    }
+    path "secret/data/roles/qa/*" {
+      capabilities = ["read"]
+    }
+    path "secret/data/roles/admin/*" {
+      capabilities = ["deny"]
+    }
+    path "secret/data/roles/developer/*" {
+      capabilities = ["deny"]
     }
     path "secret/metadata/users" {
       capabilities = ["list"]
