@@ -100,11 +100,15 @@ resource "cloudflare_zero_trust_access_application" "vpn_portal" {
 resource "cloudflare_zero_trust_access_policy" "vpn_admin_only" {
   application_id = cloudflare_zero_trust_access_application.vpn_portal.id
   zone_id        = var.cloudflare_zone_id
-  name           = "Allow Keycloak Authenticated Users"
+  name           = "Allow Only Admin and DevOps"
   decision       = "allow"
   precedence     = 1
 
   include {
+    email = [var.admin_email]
+  }
+
+  require {
     login_method = [cloudflare_zero_trust_access_identity_provider.keycloak.id]
     email        = [var.admin_email, "admin@localhost", "phungvip@ridehub.vn", "devops@ridehub.vn"]
   }
