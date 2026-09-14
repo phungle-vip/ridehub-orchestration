@@ -117,6 +117,6 @@ ansible-playbook site.yml
 
 ---
 
-* 📖 [**`docs/guides/WIREGUARD_UFW_GUIDE.md`**](../../docs/guides/WIREGUARD_UFW_GUIDE.md): **Cẩm nang Toàn Tập Mạng Dual-Layer, WireGuard, Cổng VPN & Tường Lửa UFW** — Tổng hợp trọn vẹn từ A-Z kiến trúc mạng 2 lớp (L7 vs L4), mạng LAN ảo WireGuard Kernel (`10.10.0.0/24`), cổng cấp key tự phục vụ `https://vpn.phungvip.io.vn`, thiết kế tích hợp Grafana và toàn bộ ma trận tường lửa UFW Rules.
+* 📖 [**`docs/infrastructure/network_ingress.md`**](../../docs/infrastructure/network_ingress.md): **Hạ tầng Mạng Dual-Layer, Ingress, WireGuard Mesh & Tường Lửa UFW** — Tổng hợp trọn vẹn kiến trúc mạng 2 lớp (L7 Cloudflare vs L4 WireGuard `10.10.0.0/24`), cổng cấp key tự phục vụ `https://vpn.phungvip.io.vn`, tích hợp Grafana và ma trận tường lửa UFW Rules.
 * 📖 [**`infra/orchestration/REAL_VPS_GUIDE.md`**](REAL_VPS_GUIDE.md): **Hướng dẫn đưa lên 2 VPS vật lý thật** — Chuẩn bị phần cứng, cấu hình SSH key, rsync code, kiểm tra mạng TCP Layer 4.
 * 📖 [**`AGENTS.md`**](../../AGENTS.md): **Quy chuẩn kiến trúc hệ thống RideHub** — Submodule independence, JDL code hygiene, triết lý Multi-VPS.
