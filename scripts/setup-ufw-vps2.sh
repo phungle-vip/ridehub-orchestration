@@ -2,7 +2,7 @@
 # ==============================================================================
 # RIDEHUB HOST FIREWALL SETUP - VPS 2 (MICROSERVICES)
 # Thiết lập tường lửa UFW cho máy chủ Microservices & Databases
-# Tham chiếu: docs/guides/WIREGUARD_UFW_GUIDE.md (Chương 5)
+# Tham chiếu: docs/infrastructure/network_ingress.md
 # ==============================================================================
 set -euo pipefail
 

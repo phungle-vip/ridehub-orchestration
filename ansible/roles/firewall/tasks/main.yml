@@ -1,7 +1,7 @@
 ---
 # ==============================================================================
 # Ansible Role: Firewall (UFW Layer 4 Zero-Trust Rules)
-# Tham chiếu: docs/guides/WIREGUARD_UFW_GUIDE.md (Chương 5)
+# Tham chiếu: docs/infrastructure/network_ingress.md
 # ==============================================================================
 
 - name: "Kiểm tra sự tồn tại của tiện ích ufw trên Node"
